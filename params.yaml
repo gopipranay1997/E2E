@@ -4,7 +4,7 @@ mlflow_config:
   artifacts_dir: /home/durgauser/mlruns
   experiment_name: Churn_mlops
   registered_model_name: random_forest_model
-  remote_server_uri: http://172.27.35.85:5000/
+  remote_server_uri: http://172.27.35.66:8000/
   run_name: random_forest
 model_dir: ./models/model.joblib
 model_monitor:
