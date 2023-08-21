@@ -49,7 +49,7 @@ def optimize(config_path):
     test_x,test_y=get_feat_and_target(test,target)
 
     mlflc = MLflowCallback(
-        tracking_uri="http://172.27.35.85:5000",
+        tracking_uri="http://172.27.35.66:8000",
         metric_name="AUC",create_experiment=False
     )
     import pickle
