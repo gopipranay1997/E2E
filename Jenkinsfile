@@ -8,7 +8,7 @@ pipeline {
           agent any
 
           steps {
-            sh 'sudo cp /home/durgauser/mlops/Churn_Prediction.csv ./data/external/'
+            sh 'sudo -S cp /home/durgauser/mlops/Churn_Prediction.csv ./data/external/'
             sh '/home/durgauser/anaconda3/bin/dvc repro raw_dataset_creation'
           }
         }
@@ -21,7 +21,7 @@ pipeline {
         }
         stage('EDA') {
           steps {
-            sh 'sudo cp /home/durgauser/E2E/data/external/Churn_Prediction.csv ./data/external/'
+            sh 'sudo -S cp /home/durgauser/E2E/data/external/Churn_Prediction.csv ./data/external/'
             sh '/home/durgauser/anaconda3/bin/dvc repro eda'
             sh 'sudo -S docker start churn_eda'
             sh 'sudo -S docker cp ./reports/templates/eda_report.html churn_monitor:/root/ChurnPrediction/templates/'
@@ -33,7 +33,7 @@ pipeline {
 
     stage('Preprocess') {
       steps {
-        sh 'sudo cp /home/durgauser/E2E/data/raw/Churn_Prediction.csv ./data/external/'
+        sh 'sudo -S cp /home/durgauser/E2E/data/raw/Churn_Prediction.csv ./data/external/'
         sh '/home/durgauser/anaconda3/bin/dvc repro preprocess'
       }
     }
