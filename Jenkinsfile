@@ -8,8 +8,8 @@ pipeline {
           agent any
 
           steps {
-            sh 'sudo cp /home/k8user/Akhil/mlops/mlflow/ChurnPrediction/data/external/Churn_Prediction.csv ./data/external/'
-            sh '/home/k8user/anaconda3/bin/dvc repro raw_dataset_creation'
+            sh 'sudo cp /home/durgauser/mlops/Churn_Prediction.csv ./data/external/'
+            sh '/home/durgauser/anaconda3/bin/dvc repro raw_dataset_creation'
           }
         }
 
@@ -21,11 +21,11 @@ pipeline {
         }
         stage('EDA') {
           steps {
-            sh 'sudo cp /home/k8user/Akhil/mlops/mlflow/ChurnPrediction/data/external/Churn_Prediction.csv ./data/external/'
-            sh '/home/k8user/anaconda3/bin/dvc repro eda'
+            sh 'sudo cp /home/durgauser/E2E/data/external/Churn_Prediction.csv ./data/external/'
+            sh '/home/durgauser/anaconda3/bin/dvc repro eda'
             sh 'sudo -S docker start churn_eda'
             sh 'sudo -S docker cp ./reports/templates/eda_report.html churn_monitor:/root/ChurnPrediction/templates/'
-            echo 'Check Data Quality and EDA at http://172.27.35.85:3500/eda'
+            echo 'Check Data Quality and EDA at http://172.27.35.66:3500/eda'
           }
         }
       }
@@ -33,32 +33,32 @@ pipeline {
 
     stage('Preprocess') {
       steps {
-        sh 'sudo cp /home/k8user/Akhil/mlops/mlflow/ChurnPrediction/data/raw/Churn_Prediction.csv ./data/external/'
-        sh '/home/k8user/anaconda3/bin/dvc repro preprocess'
+        sh 'sudo cp /home/durgauser/E2E/data/raw/Churn_Prediction.csv ./data/external/'
+        sh '/home/durgauser/anaconda3/bin/dvc repro preprocess'
       }
     }
 
     stage('Split') {
       steps {
-        sh '/home/k8user/anaconda3/bin/dvc repro split_data'
+        sh '/home/durgauser/anaconda3/bin/dvc repro split_data'
       }
     }
 
     stage('Optimize Hyperparametre') {
       steps {
-        sh '/home/k8user/anaconda3/bin/dvc repro optimize'
+        sh '/home/durgauser/anaconda3/bin/dvc repro optimize'
       }
     }
 
     stage('Train/Test') {
       steps {
-        sh '/home/k8user/anaconda3/bin/dvc repro model_train'
+        sh '/home/durgauser/anaconda3/bin/dvc repro model_train'
       }
     }
 
     stage('Register Model') {
       steps {
-        sh '/home/k8user/anaconda3/bin/dvc repro log_production_model'
+        sh '/home/durgauser/anaconda3/bin/dvc repro log_production_model'
       }
     }
 
@@ -70,14 +70,14 @@ pipeline {
 
     stage('Push Image') {
       steps {
-        sh 'sudo -S docker tag churn:latest theakhilb/mlflow_churn:latest'
-        sh 'sudo -S docker push theakhilb/mlflow_churn:latest'
+        sh 'sudo -S docker tag churn:latest gangadhar420/eda:latest'
+        sh 'sudo -S docker push gangadhar420/eda:latest'
       }
     }
 
     stage('Deploy in Kubernetes') {
       steps {
-        withKubeConfig(credentialsId: 'kube', serverUrl: 'https://172.27.35.85:6443') {
+        withKubeConfig(credentialsId: 'kube', serverUrl: 'https://172.27.35.66:6443') {
           sh 'kubectl apply -f ./deployment/deployment.yaml'
           sh 'kubectl apply -f ./deployment/service.yaml'
         }
@@ -89,13 +89,13 @@ pipeline {
       parallel {
         stage('Monitor Cluster') {
           steps {
-            echo 'Check the Cluster and Deployment health at http://172.27.35.85:3000'
+            echo 'Check the Cluster and Deployment health at http://172.27.35.66:3000'
           }
         }
 
         stage('Monitor Data Drift') {
           steps {
-            sh '/home/k8user/anaconda3/bin/dvc repro monitor_model'
+            sh '/home/durgauser/anaconda3/bin/dvc repro monitor_model'
           }
         }
 
@@ -106,7 +106,7 @@ pipeline {
       steps {
         sh 'sudo -S docker start churn_monitor'
         sh 'sudo -S docker cp ./reports/templates/data_and_target_drift_dashboard.html churn_monitor:/root/ChurnPrediction/templates/'
-        echo 'Check Data Drift at http://172.27.35.85:3600/monitor_data'
+        echo 'Check Data Drift at http://172.27.35.66:3600/monitor_data'
       }
     }
     stage('Retrain') {
@@ -116,7 +116,7 @@ pipeline {
           echo "Drift Score: " + configVal["model_monitor"]["drift_score"]
           if (configVal["model_monitor"]["drift_score"] > 5){
             echo "Retraining the model"
-            sh '/home/k8user/anaconda3/bin/dvc repro model_train'
+            sh '/home/durgauser/anaconda3/bin/dvc repro model_train'
           }
           else {
             echo 'There is no drift detected in data. Retraining is not required'

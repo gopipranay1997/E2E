@@ -18,7 +18,7 @@ spec:
         env: qd
     spec:
       containers:
-      - image: theakhilb/mlflow_churn:latest # Docker image name
+      - image: gangadhar420/eda:latest # Docker image name
         name: mlflow-churn-api  # POD name
         ports:
         - containerPort: 5555
