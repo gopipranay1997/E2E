@@ -1,0 +1,59 @@
+stages:
+  raw_dataset_creation:
+    cmd: python3 ./src/data/load_data.py --config=params.yaml
+    deps:
+    - ./src/data/load_data.py
+    - ./data/external/Churn_Prediction.csv
+    outs:
+    - ./data/raw/Churn_Prediction.csv
+  eda:
+    cmd: python3 ./src/data/eda.py --config=params.yaml
+    deps:
+    - ./src/data/eda.py
+    - ./data/external/Churn_Prediction.csv
+    outs:
+    - ./reports/templates/eda_report.html
+  preprocess:
+    cmd: python3 ./src/data/preprocess.py --config=params.yaml
+    deps:
+    - ./src/data/preprocess.py
+    - ./data/raw/Churn_Prediction.csv
+    outs:
+    - ./data/processed/processed_data.csv
+  split_data:
+    cmd: python3 ./src/data/split_data.py --config=params.yaml
+    deps:
+    - ./src/data/split_data.py
+    - ./data/processed/processed_data.csv
+    outs:
+    - ./data/processed/churn_train.csv
+    - ./data/processed/churn_test.csv
+  optimize:
+    cmd: python3 ./src/models/optimization.py --config=params.yaml
+    deps:
+    - ./data/processed/churn_train.csv
+    - ./data/processed/churn_test.csv
+    - ./src/models/optimization.py
+  model_train:
+    cmd: python3 ./src/models/train_model.py --config=params.yaml
+    deps:
+    - ./src/models/train_model.py
+    params:
+    - random_forest.max_depth
+    - random_forest.n_estimators
+  log_production_model:
+    cmd: python3 ./src/models/model_selection.py --config=params.yaml
+    deps:
+    - ./src/models/model_selection.py
+    params:
+    - random_forest.max_depth
+    - random_forest.n_estimators
+    outs:
+    - ./models/model.joblib
+  monitor_model:
+    cmd: python3 ./src/models/model_monitor.py --config=params.yaml
+    deps:
+    - ./src/models/model_monitor.py
+    - ./data/raw/train_new.csv
+    outs:
+    - ./reports/templates/data_and_target_drift_dashboard.html

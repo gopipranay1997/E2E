@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: mlflow-churn
+    env: qd
+  name: mlflow-churn
+  namespace: mlops
+spec:
+  replicas: 1 # Creating two PODs for our app
+  selector:
+    matchLabels:
+      app: mlflow-churn
+  template:
+    metadata:
+      labels:
+        app: mlflow-churn
+        env: qd
+    spec:
+      containers:
+      - image: theakhilb/mlflow_churn:latest # Docker image name
+        name: mlflow-churn-api  # POD name
+        ports:
+        - containerPort: 5555

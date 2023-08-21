@@ -1,0 +1,20 @@
+# Build an image that can serve mlflow models.
+
+FROM ubuntu:latest
+
+RUN apt-get -y update
+
+RUN apt-get install -y python3 && apt-get install -y python3-pip python3-dev && cd /usr/local/bin && ln -s /usr/bin/python3 python && pip3 install flask
+
+RUN apt-get -y install git && apt-get -y install nano
+
+WORKDIR /root/ChurnPrediction
+
+COPY . .
+
+EXPOSE 3600
+
+CMD ["python","monitor.py"]
+
+
+
