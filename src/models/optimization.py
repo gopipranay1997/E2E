@@ -14,7 +14,7 @@ from sklearn.ensemble import RandomForestClassifier
 
 
 mlflow.set_tracking_uri("http://172.27.35.66:8000")
-mlflow.set_experiment("Churn_mlops")
+mlflow.set_experiment("Churn")
 
 def read_params(config_path):
     """

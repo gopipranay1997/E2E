@@ -24,8 +24,9 @@ stages:
       size: 1538
     outs:
     - path: ./reports/templates/eda_report.html
-      md5: 2f8d4944a33bfc5d10223623ed998f42
-      size: 2892001
+      hash: md5
+      md5: 63bdd9605844f0716996fc1563271157
+      size: 2892009
   preprocess:
     cmd: python3 ./src/data/preprocess.py --config=params.yaml
     deps:
@@ -65,5 +66,49 @@ stages:
       md5: c900296636fd3eb243a0d938c80750d7
       size: 320132
     - path: ./src/models/optimization.py
-      md5: ada42fa6cbf86b274b3592af670b12a3
-      size: 3163
+      hash: md5
+      md5: 6b180232e13bf4d1bb44a8b947da8955
+      size: 3157
+  model_train:
+    cmd: python3 ./src/models/train_model.py --config=params.yaml
+    deps:
+    - path: ./src/models/train_model.py
+      hash: md5
+      md5: b07a71a2d8c566096667d966e889561a
+      size: 3929
+    params:
+      params.yaml:
+        random_forest.max_depth: 20
+        random_forest.n_estimators: 8
+  log_production_model:
+    cmd: python3 ./src/models/model_selection.py --config=params.yaml
+    deps:
+    - path: ./src/models/model_selection.py
+      hash: md5
+      md5: ddd255e12d28990d17e0a481f42bfb77
+      size: 2076
+    params:
+      params.yaml:
+        random_forest.max_depth: 20
+        random_forest.n_estimators: 8
+    outs:
+    - path: ./models/model.joblib
+      hash: md5
+      md5: d013179c0181d04b56b70b2f847af77d
+      size: 464688
+  monitor_model:
+    cmd: python3 ./src/models/model_monitor.py --config=params.yaml
+    deps:
+    - path: ./data/raw/train_new.csv
+      hash: md5
+      md5: 8171271e66fbf81e40ebb9718d58ed55
+      size: 47092
+    - path: ./src/models/model_monitor.py
+      hash: md5
+      md5: 9622f8fd2a95f3eab5449c77ad04e496
+      size: 2251
+    outs:
+    - path: ./reports/templates/data_and_target_drift_dashboard.html
+      hash: md5
+      md5: 9d8359f609cabb71b33acfea337de1f1
+      size: 3023120

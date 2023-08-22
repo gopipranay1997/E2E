@@ -86,15 +86,16 @@ def train_and_evaluate(config_path):
 
         mlflow.sklearn.log_model(
                 model,str(mlflow_config["registered_model_name"]))
-        tracking_url_type_store = urlparse(mlflow.get_artifact_uri()).scheme
-        run_id = mlops_run.info.run_id
 
+        tracking_url_type_store = urlparse(mlflow.get_artifact_uri()).scheme
+        
         if tracking_url_type_store != "file":
             mlflow.sklearn.log_model(
-                model,str(mlflow_config["registered_model_name"]))
+                model,
+                "model",
+                registered_model_name=mlflow_config["registered_model_name"],)
         else:
-            logged_model = f'runs:/{run_id}/{mlflow_config["registered_model_name"]}'
-            mlflow.sklearn.load_model(logged_model)
+            mlflow.sklearn.load_model(model, "model")
 
 if __name__=="__main__":
     args = argparse.ArgumentParser()

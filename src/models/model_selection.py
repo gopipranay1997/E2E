@@ -14,7 +14,7 @@ def log_production_model(config_path):
 
     mlflow.set_tracking_uri(remote_server_uri)
     # Load all runs from experiment
-    experiment_id = mlflow.get_experiment_by_name("Churn_mlops").experiment_id
+    experiment_id = mlflow.get_experiment_by_name("Churn").experiment_id
     all_runs = mlflow.search_runs(experiment_ids=experiment_id, order_by=["metrics.accuracy DESC"])
     # Best run
     best_run_id = all_runs.iloc[0].run_id
@@ -26,7 +26,6 @@ def log_production_model(config_path):
     client = MlflowClient()
     for mv in client.search_model_versions(f"name='{model_name}'"):
         mv = dict(mv)
-
         if mv["run_id"] == best_run_id:
             current_version = mv["version"]
             logged_model = mv["source"]
@@ -43,7 +42,8 @@ def log_production_model(config_path):
                 version=current_version,
                 stage="Staging"
             )
-
+            logged_model = f'runs:/{best_run_id}/{mlflow_config["registered_model_name"]}'
+    
     loaded_model = mlflow.pyfunc.load_model(logged_model)
     joblib.dump(loaded_model, model_dir)
 
