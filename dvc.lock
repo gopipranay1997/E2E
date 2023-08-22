@@ -1,0 +1,69 @@
+schema: '2.0'
+stages:
+  raw_dataset_creation:
+    cmd: python3 ./src/data/load_data.py --config=params.yaml
+    deps:
+    - path: ./data/external/Churn_Prediction.csv
+      md5: 7321aa9a1e24a9e139f42124f736b415
+      size: 674857
+    - path: ./src/data/load_data.py
+      md5: 4a43bd22a142c77f117b6dde8e3451fc
+      size: 1314
+    outs:
+    - path: ./data/raw/Churn_Prediction.csv
+      md5: d9534fcf204e37ae58a7d7313ce4659c
+      size: 469203
+  eda:
+    cmd: python3 ./src/data/eda.py --config=params.yaml
+    deps:
+    - path: ./data/external/Churn_Prediction.csv
+      md5: 7321aa9a1e24a9e139f42124f736b415
+      size: 674857
+    - path: ./src/data/eda.py
+      md5: 2b0d30a5ed69fd4f7c136f059640f10c
+      size: 1538
+    outs:
+    - path: ./reports/templates/eda_report.html
+      md5: 2f8d4944a33bfc5d10223623ed998f42
+      size: 2892001
+  preprocess:
+    cmd: python3 ./src/data/preprocess.py --config=params.yaml
+    deps:
+    - path: ./data/raw/Churn_Prediction.csv
+      md5: d9534fcf204e37ae58a7d7313ce4659c
+      size: 469203
+    - path: ./src/data/preprocess.py
+      md5: 8eb8bd0424341b8cb118711a408c5313
+      size: 1533
+    outs:
+    - path: ./data/processed/processed_data.csv
+      md5: 487733dd81bed7f60072fc7a803fbf8f
+      size: 400114
+  split_data:
+    cmd: python3 ./src/data/split_data.py --config=params.yaml
+    deps:
+    - path: ./data/processed/processed_data.csv
+      md5: 487733dd81bed7f60072fc7a803fbf8f
+      size: 400114
+    - path: ./src/data/split_data.py
+      md5: f6191b05190b1b8e5bf4e4f6f96f679f
+      size: 1451
+    outs:
+    - path: ./data/processed/churn_test.csv
+      md5: 0fc6853dea827712941c41c40d564d1f
+      size: 80121
+    - path: ./data/processed/churn_train.csv
+      md5: c900296636fd3eb243a0d938c80750d7
+      size: 320132
+  optimize:
+    cmd: python3 ./src/models/optimization.py --config=params.yaml
+    deps:
+    - path: ./data/processed/churn_test.csv
+      md5: 0fc6853dea827712941c41c40d564d1f
+      size: 80121
+    - path: ./data/processed/churn_train.csv
+      md5: c900296636fd3eb243a0d938c80750d7
+      size: 320132
+    - path: ./src/models/optimization.py
+      md5: ada42fa6cbf86b274b3592af670b12a3
+      size: 3163

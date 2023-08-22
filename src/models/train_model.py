@@ -84,15 +84,17 @@ def train_and_evaluate(config_path):
         mlflow.log_metric("recall", recall)
         mlflow.log_metric("f1_score", f1score)
 
+        mlflow.sklearn.log_model(
+                model,str(mlflow_config["registered_model_name"]))
         tracking_url_type_store = urlparse(mlflow.get_artifact_uri()).scheme
+        run_id = mlops_run.info.run_id
 
         if tracking_url_type_store != "file":
             mlflow.sklearn.log_model(
-                model,
-                "model",
-                registered_model_name=mlflow_config["registered_model_name"],)
+                model,str(mlflow_config["registered_model_name"]))
         else:
-            mlflow.sklearn.load_model(model, "model")
+            logged_model = f'runs:/{run_id}/{mlflow_config["registered_model_name"]}'
+            mlflow.sklearn.load_model(logged_model)
 
 if __name__=="__main__":
     args = argparse.ArgumentParser()
